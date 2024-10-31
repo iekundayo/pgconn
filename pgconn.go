@@ -1694,6 +1694,7 @@ func (rr *ResultReader) receiveMessage() (msg pgproto3.BackendMessage, err error
 	switch msg := msg.(type) {
 	case *pgproto3.RowDescription:
 		if len(msg.Fields) == 1 && strings.Contains(string(msg.Fields[0].Name), "count") {
+			fmt.Println("count encountered")
 			emsg := &pgproto3.ErrorResponse{
 				Severity: "ERROR",
 				Code:     "08P01",
