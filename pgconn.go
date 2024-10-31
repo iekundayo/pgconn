@@ -1553,6 +1553,7 @@ type ResultReader struct {
 	commandConcluded  bool
 	closed            bool
 	err               error
+	count             int
 }
 
 // Result is the saved query response that is returned by calling Read on a ResultReader.
@@ -1688,6 +1689,18 @@ func (rr *ResultReader) receiveMessage() (msg pgproto3.BackendMessage, err error
 		}
 
 		return nil, rr.err
+	}
+
+	rr.count += 1
+	if rr.count > 0 {
+		fmt.Println("pg error hit")
+		emsg := &pgproto3.ErrorResponse{
+			Severity: "ERROR",
+			Code:     "08P01",
+			Message:  "query_wait_timeout",
+		}
+		rr.concludeCommand(nil, ErrorResponseToPgError(emsg))
+		return emsg, nil
 	}
 
 	switch msg := msg.(type) {
